@@ -587,7 +587,7 @@ app.get('/Karta/ponudaDatum/:datum_prikazivanja/:id_korisnik', (request, respons
 
   var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
 
-  var sql = "SELECT Film.slika, Film.naziv, Film.id, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja FROM Karta, Raspored_filmova, Film WHERE Karta.id_korisnik = ? AND Raspored_filmova.datum_prikazivanja = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?";
+  var sql = "SELECT Film.slika, Film.naziv, Karta.id, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja FROM Karta, Raspored_filmova, Film WHERE Karta.id_korisnik = ? AND Raspored_filmova.datum_prikazivanja = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?";
   con.query(sql, [id_korisnik, datum_prikazivanja, datum_unosa], (err,res)=>{
     if(err) throw err; 
 
