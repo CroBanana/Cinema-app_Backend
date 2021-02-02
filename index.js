@@ -129,25 +129,6 @@ app.post('/film/dodaj_zanr', (request, response, next)=> {
 
 */
 
-app.post('/user/update2', (request, response, next)=>{
-
-  let post_data = request.body; 
-
-  let ime = post_data.ime; 
-  let prezime = post_data.prezime; 
-  let telefon = post_data.telefon;
-  let email = post_data.email; 
-  let id = post_data.id; 
-  
-  var sql = 'UPDATE User SET ime = ?, prezime = ?, telefon = ?, email = ? WHERE id = ? ';
-
-  con.query(sql,[ ime, prezime, telefon, email, id], (err,res)=>{
-      if(err) throw err; 
-      
-      response.json(true); 
-  })
-  
-})
 
 
 app.post('/unos_filma', (request, response, next)=> {
@@ -186,11 +167,20 @@ app.post('/user/update', (request, response, next)=>{
     changeUser.changeUser(post_data,response)
 })
 
+app.post('/user/update2', (request, response, next)=>{
+
+  let post_data = request.body; 
+
+  changeUser.changeUserNoPassword(post_data,response)
+})
+
 app.get('/user/podaci/:email', (request, response, next)=>{
 
   var sql = "SELECT * FROM User WHERE email = ?"; 
   DBconnection.userData(sql,request.params.email,response)
 })
+
+
 
 
 app.get('/user/podaci_id/:id', (request, response, next)=>{

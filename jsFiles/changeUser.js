@@ -12,8 +12,13 @@ module.exports ={
         console.log(hash)
         
     
-        var sql = 'UPDATE User SET ime = ?, prezime = ?, telefon = ?, email = ?, lozinka = ? WHERE id = ? ';
+        var sql = 'UPDATE User SET ime = ?, prezime = ?, telefon = ?, email = ?, lozinka = ?, slika = ? WHERE id = ? ';
         
         dbcon.updateUser(sql,post_data,hash,response)
+    },
+
+    changeUserNoPassword:function(post_data, response){
+        var sql = 'UPDATE User SET ime = ?, prezime = ?, telefon = ?, email = ?, slika = ? WHERE id = ? ';
+        dbcon.updateUser(sql, post_data,null,response)
     }
 }

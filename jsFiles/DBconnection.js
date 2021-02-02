@@ -133,13 +133,20 @@ module.exports = {
   },
 
   updateUser:function(sql,data,hash,response){
+    if(hash == null){
+      con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, data.slika, data.id], (err,res)=>{
+        if(err) throw err; 
+        
+        response.json(true); 
+    })
+    }else{
+      con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, data.slika , data.id], (err,res)=>{
+        if(err) throw err; 
+        
+        response.json(true); 
+    })
+    }
     
-
-    con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, hash, data.id], (err,res)=>{
-      if(err) throw err; 
-      
-      response.json(true); 
-  })
   },
 
   userData:function(sql, searching, response){
