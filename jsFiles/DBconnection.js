@@ -134,13 +134,15 @@ module.exports = {
 
   updateUser:function(sql,data,hash,response){
     if(hash == null){
+      console.log(sql)
       con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, data.slika, data.id], (err,res)=>{
         if(err) throw err; 
         
         response.json(true); 
     })
     }else{
-      con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, data.slika , data.id], (err,res)=>{
+      console.log(sql)
+      con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, hash, data.slika , data.id], (err,res)=>{
         if(err) throw err; 
         
         response.json(true); 
