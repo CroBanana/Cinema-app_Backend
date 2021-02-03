@@ -111,7 +111,7 @@ module.exports = {
       con.query(sql,(err, res)=>{
         if(err) throw err; 
         if(res.length>0){
-          //console.log(res); 
+          console.log(res); 
           response.json(res);
         }
       })

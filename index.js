@@ -11,6 +11,12 @@ app.use(bodyParser.json());
 app.use(express.json({limit: '50mb', extended: true}));
 app.use(express.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", "*");
+  next();
+});
+
 var mysql = require('mysql'); 
 const { request, response } = require('express');
 const backend = process.env.PORT || 3000; 
@@ -87,10 +93,12 @@ app.post('/login', (request, response, next)=>{
 var DBconnection = require("./jsFiles/DBconnection")
 app.get('/dohvat_filmova',(request, response, next)=>{
   console.log("Pokusaj dohvacanja filmova")
-  response.json("OK???")
-  var sql = "SELECT naziv, slika, zanr, trajanje, ocjena, id, slika_pozadina FROM Film"; 
-  //var sql = "SELECT * FROM Film"; 
-  //DBconnection.getMovies(response,sql)
+  //console.log(response)
+  
+  //response.json("OK???")
+  //var sql = "SELECT naziv, slika, zanr, trajanje, ocjena, id, slika_pozadina FROM Film"; 
+  var sql = "SELECT * FROM Film"; 
+  DBconnection.getMovies(response,sql)
 })
 
 app.get('/film/filmDetalji/:id',(request, response, next)=>{
@@ -135,7 +143,7 @@ app.post('/film/dodaj_zanr', (request, response, next)=> {
 app.post('/unos_filma', (request, response, next)=> {
   
   console.log(request.body)
-  response.json("ok")
+  response.json("ok       string za ubacivanje INSERT INTO Film(naziv,strani_naziv,redatelji,glumci,drzava,audio,titlovi,trajanje,opis,slika,slika_pozadina, zanr, ocjena) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
 
 
 /*
@@ -568,11 +576,6 @@ app.get('/Film/dohvat_preporuka', (request, response, next) =>{
 var login = require("./jsFiles/login")
 //var register = require("./register")
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-  res.header("Access-Control-Allow-Headers", "*");
-  next();
-});
 
   app.post("/db/login", (req,res) =>{
     console.log(req.body)
