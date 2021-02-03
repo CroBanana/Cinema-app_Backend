@@ -87,9 +87,10 @@ app.post('/login', (request, response, next)=>{
 var DBconnection = require("./jsFiles/DBconnection")
 app.get('/dohvat_filmova',(request, response, next)=>{
   console.log("Pokusaj dohvacanja filmova")
+  response.json("OK???")
   var sql = "SELECT naziv, slika, zanr, trajanje, ocjena, id, slika_pozadina FROM Film"; 
   //var sql = "SELECT * FROM Film"; 
-  DBconnection.getMovies(response,sql)
+  //DBconnection.getMovies(response,sql)
 })
 
 app.get('/film/filmDetalji/:id',(request, response, next)=>{
@@ -133,22 +134,11 @@ app.post('/film/dodaj_zanr', (request, response, next)=> {
 
 app.post('/unos_filma', (request, response, next)=> {
   
-  let post_data = request.body; 
+  console.log(request.body)
+  response.json("ok")
 
-  let naziv = post_data.naziv; 
-  let strani_naziv = post_data.strani_naziv; 
-  let redatelji = post_data.redatelji; 
-  let glumci = post_data.glumci; 
-  let drzava = post_data.drzava; 
-  let audio = post_data.audio; 
-  let titlovi = post_data.titlovi; 
-  let trajanje = post_data.trajanje; 
-  let opis = post_data.opis; 
-  let ocjena = post_data.ocjena; 
-  let slika = post_data.slika; 
-  let slika_pozadina = post_data.slika_pozadina; 
-  let zanr = post_data.zanr; 
 
+/*
   var sql = 'INSERT INTO Film(naziv,strani_naziv,redatelji,glumci,drzava,audio,titlovi,trajanje,opis,slika,slika_pozadina, zanr, ocjena) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
 
       con.query(sql,[naziv,strani_naziv,redatelji,glumci,drzava,audio,titlovi,trajanje,opis,slika,slika_pozadina, zanr, ocjena], (err,res) =>{
@@ -158,7 +148,8 @@ app.post('/unos_filma', (request, response, next)=> {
            response.send(true);
      })
   }
-);
+  */
+})
 
 var changeUser = require("./jsFiles/changeUser")
 app.post('/user/update', (request, response, next)=>{
@@ -584,4 +575,5 @@ app.use(function(req, res, next) {
 });
 
   app.post("/db/login", (req,res) =>{
+    console.log(req.body)
     login.login(req,res)})
