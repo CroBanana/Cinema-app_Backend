@@ -12,6 +12,7 @@ var con = mysql.createConnection({
 module.exports = {
   checkEmailAndPassword: function (checkEmail,password, response){
     con.query(checkEmail, (err, res)=>{
+      con.release();
       if (err) throw err
       if(res.length>0 ){
         var isAdmin=false;
@@ -48,6 +49,7 @@ module.exports = {
                         "${admin.potvrda}")`
       console.log(insertAdmin)
       con.query(checkIfEmailExists,(err,res)=>{
+        con.release();
         if(err) throw err;
         if(res.length>0){
           console.log("email "+admin.email+" alredy exists")
@@ -65,6 +67,7 @@ module.exports = {
   insertTables:function(tables){
     tables.forEach(table=>{
       con.query(table, function(err,res){
+        con.release();
         if(err) console.log(err);
     
         console.log("created table if not exists");
@@ -76,6 +79,7 @@ module.exports = {
   register:function(post_data, hash, insertUser, checkEmail,response){
         
     con.query(checkEmail,[post_data.email],(err,res)=>{
+      con.release();
       if(err) throw err;
       if(res.length>0){
         response.json("Korisnik već postoji!");
@@ -94,6 +98,7 @@ module.exports = {
 
   androidLogin:function(post_data,hash, findUser, response){
     con.query(findUser,[post_data.email, hash],(err,res)=>{
+      con.release();
       if(err) throw err; 
       console.log(res);
       if(res.length > 0){
@@ -109,6 +114,7 @@ module.exports = {
     if(searching== null){
       
       con.query(sql,(err, res)=>{
+        con.release();
         if(err) throw err; 
         if(res.length>0){
           console.log(res); 
@@ -120,6 +126,7 @@ module.exports = {
       console.log(searching)
       console.log("Did the vrite out?")
       con.query(sql,[searching],(err, res)=>{
+        con.release();
         console.log(sql)
         console.log(res)
         if(err) throw err; 
@@ -136,6 +143,7 @@ module.exports = {
     if(hash == null){
       console.log(sql)
       con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, data.slika, data.id], (err,res)=>{
+        con.release();
         if(err) throw err; 
         
         response.json(true); 
@@ -143,6 +151,7 @@ module.exports = {
     }else{
       console.log(sql)
       con.query(sql,[ data.ime, data.prezime, data.telefon, data.email, hash, data.slika , data.id], (err,res)=>{
+        con.release();
         if(err) throw err; 
         
         response.json(true); 
@@ -153,6 +162,7 @@ module.exports = {
 
   userData:function(sql, searching, response){
     con.query(sql, [searching], (err, res)=>{
+      con.release();
       if(err) throw err; 
       if(res.length>0){
         console.log(res); 
@@ -165,7 +175,7 @@ module.exports = {
 
   dodajNoviIzbor:function(sql,post_data, response){
     con.query(sql, [post_data.datum_dodavanja, post_data.id_korisnik, post_data.id_film], (err, res)=>{
-
+      con.release();
       if(err) throw err; 
   
       response.json("true"); 
@@ -176,6 +186,7 @@ module.exports = {
     console.log(data.id_korisnik)
     console.log(data.id_film)
     con.query(sql, [data.id_korisnik, data.id_film], (err, res)=>{
+      con.release();
       if(err) throw err; 
   
       if(res.length>0){
@@ -190,6 +201,7 @@ module.exports = {
 
   dohvatPoDatumu:function(sql, data, response){
     con.query(sql, [data.id_korisnik, data.datum_dodavanja], (err,res)=>{
+      con.release();
       if(err) throw err; 
   
       if(res.length > 0){
@@ -203,6 +215,7 @@ module.exports = {
 
   deleteIzbor:function(sql,data, response){
     con.query(sql, [data.id_korisnik, data.id_film], (err,res)=>{
+      con.release();
 
       if(err) throw err; 
   
@@ -212,6 +225,7 @@ module.exports = {
 
   izborDohvat:function(sql,data,response){
     con.query(sql, [data.id_korisnik], (err,res)=>{
+      con.release();
       if(err) throw err; 
   
       console.log("Prikazani su svi izbori!"); 

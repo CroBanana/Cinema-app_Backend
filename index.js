@@ -234,6 +234,7 @@ app.post('/Cijene/unosCijene', (request, response, next) =>{
 
   var sql = "INSERT INTO Cijene (datum_unosa, naziv, cijene_djeca, cijene_odrasli, cijene_studenti) VALUES (?,?,?, ?, ?)"; 
   con.query(sql, [datum_unosa, naziv, cijene_djeca, cijene_odrasli, cijene_studenti], (err, res)=>{
+    con.release();
     if(err) throw err; 
     
     console.log("uneseno");
@@ -261,6 +262,7 @@ app.post("/Raspored_filmova/dodaj", (request, response, next)=>{
 
   var sql = "INSERT INTO Raspored_filmova (id_filma, datum_unosa, datum_prikazivanja, vrijeme_prikazivanja, max_ulaznica, trenutno_ulaznica, dvorana) VALUES (?,?,?,?,?,?,?)"; 
   con.query(sql, [id_filma, datum_unosa, datum_prikazivanja, vrijeme_prikazivanja,max_ulaznica, trenutno_ulaznica, dvorana], (err,res)=>{
+    con.release();
     if(err) throw err; 
     console.log("Uneseno");
     response.send("uneseno");
@@ -274,6 +276,7 @@ app.get('/Raspored_filmova/dohvatFilma/:id_filma', (request, response,next) =>{
 
   var sql = "SELECT Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja  FROM Raspored_filmova, Film WHERE Raspored_filmova.id_filma = ? AND Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?"; 
   con.query(sql, [id_filma,datum_unosa], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     console.log("Prikazani su svi izbori!"); 
@@ -285,6 +288,7 @@ app.get('/Cijene/dohvatCijena', (request, response, next)=>{
 
     var sql = "SELECT * FROM Cijene WHERE datum_unosa = (SELECT MAX(datum_unosa) FROM Cijene)"; 
     con.query(sql, (err, res)=>{
+      con.release();
       if(err) throw err; 
 
       response.json(res);
@@ -300,7 +304,9 @@ app.get('/Raspored_filmova/dohvatDatum/:datum_prikazivanja', (request, response,
 
   var sql = "SELECT Film.naziv, Raspored_filmova.vrijeme_prikazivanja FROM Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?"; 
   con.query(sql, [datum_prikazivanja, datum_unosa], (err,res)=>{
+    con.release();
     if(err) throw err; 
+    
 
     if(res.length > 0){
       response.json(res); 
@@ -318,6 +324,7 @@ app.get('/Film/dohvatId/:naziv', (request, response, next)=>{
 
   var sql = "SELECT id FROM Film WHERE naziv = ?"; 
   con.query(sql, [naziv], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -337,6 +344,7 @@ app.get('/Raspored_filmova/dohvatNaziv/:datum_prikazivanja/:id_filma', (request,
 
   var sql = "SELECT Raspored_filmova.vrijeme_prikazivanja FROM Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.id_filma = ? AND Raspored_filmova.id_filma = Film.id "; 
   con.query(sql, [datum_prikazivanja, id_filma], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -360,6 +368,7 @@ app.get('/Raspored_filmova/dohvatiSve/:datum_prikazivanja/:id_filma/:vrijeme_pri
 
   var sql = "SELECT Raspored_filmova.id, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Raspored_filmova.max_ulaznica, Raspored_filmova.trenutno_ulaznica, Raspored_filmova.dvorana FROM Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.vrijeme_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id";
   con.query(sql, [datum_prikazivanja, vrijeme_prikazivanja, id_filma], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -388,7 +397,7 @@ app.post('/Karta/insert', (request, response, next) => {
 
   var sql = "INSERT INTO Karta (ime, prezime, cijena, red, sjedalo, oznaka, ukupno, id_raspored, id_korisnik) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
   con.query(sql, [ime, prezime, cijena, red, sjedalo, oznaka, ukupno, id_raspored, id_korisnik,], (err, res)=>{
-
+    con.release();
     if(err) throw err; 
 
     response.json("true"); 
@@ -405,6 +414,7 @@ app.post('/Raspored_filmova/update', (request, response, next)=>{
   var sql = 'UPDATE Raspored_filmova SET trenutno_ulaznica = ? WHERE id = ? ';
 
   con.query(sql,[trenutno_ulaznica, id], (err,res)=>{
+    con.release();
       if(err) throw err; 
       
       response.json(true); 
@@ -421,6 +431,7 @@ app.get('/Karta/dohvatiSve/:datum_prikazivanja/:id_filma/:vrijeme_prikazivanja/:
 
   var sql = "SELECT Karta.oznaka FROM Karta, Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.vrijeme_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id AND Raspored_filmova.id = Karta.id_raspored";
   con.query(sql, [datum_prikazivanja, vrijeme_prikazivanja, id_filma, id], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -442,6 +453,7 @@ app.get('/Karta/ponudaDatum/:datum_prikazivanja/:id_korisnik', (request, respons
 
   var sql = "SELECT Film.slika, Film.naziv, Film.id, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja FROM Karta, Raspored_filmova, Film WHERE Karta.id_korisnik = ? AND Raspored_filmova.datum_prikazivanja = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?";
   con.query(sql, [id_korisnik, datum_prikazivanja, datum_unosa], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -462,6 +474,7 @@ app.get('/Karta/sveRezervacije/:id_korisnik', (request, response, next)=>{
 
   var sql = "SELECT Film.slika, Film.naziv, Karta.id, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja FROM Karta, Raspored_filmova, Film WHERE Karta.id_korisnik = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?";
   con.query(sql, [id_korisnik, datum_unosa], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -480,6 +493,7 @@ app.get('/Karta/dohvatiRezervaciju/:id', (request, response, next)=>{
 
   var sql = "SELECT Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje, Film.ocjena FROM Karta, Raspored_filmova, Film WHERE Karta.id = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id ";
   con.query(sql, [id], (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -498,7 +512,7 @@ app.delete('/Karta/deleteRezervacija/:id', (request, response, next)=>{
 
   var sql = "DELETE FROM Karta WHERE id = ?"; 
   con.query(sql, [id], (err,res)=>{
-
+    con.release();
     if(err) throw err; 
 
     response.json("true"); 
@@ -515,7 +529,7 @@ app.post('/Najcesca_pitanja/insert', (request, response, next) => {
 
   var sql = "INSERT INTO Najcesca_pitanja (naziv, opis) VALUES (?, ?)"; 
   con.query(sql, [naziv,opis], (err, res)=>{
-
+    con.release();
     if(err) throw err; 
 
     response.json("true"); 
@@ -526,6 +540,7 @@ app.get('/Najcesca_pitanja/dohvatPitanja/', (request, response, next)=>{
 
   var sql = "SELECT * FROM Najcesca_pitanja"; 
   con.query(sql, (err,res)=>{
+    con.release();
     if(err) throw err; 
 
     if(res.length > 0){
@@ -548,6 +563,7 @@ app.post('/Upit/insert', (request, response, next)=> {
   var sql = 'INSERT INTO Upit(pitanje, prijedlog, id_korisnik) VALUES ( ?, ?, ?)';
 
       con.query(sql,[pitanje, prijedlog, id_korisnik], (err,res) =>{
+        con.release();
           if(err){
              throw err;
            }
@@ -561,9 +577,10 @@ app.get('/Film/dohvat_preporuka', (request, response, next) =>{
   let post_data = request.body; 
   
   var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
- 
+  
   var sql = "SELECT DISTINCT Film.naziv, Film.slika, Film.zanr, Film.trajanje, Film.ocjena, Film.id, Film.slika_pozadina FROM Film, Raspored_filmova WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id"; 
   con.query(sql, [datum_unosa], (err, res)=>{
+    con.release();
     if(err) throw err; 
     
     response.json(res);
