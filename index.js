@@ -57,7 +57,7 @@ createAdmins.createAdmins()
 
 ///////         \_(*.*)_/       why do we need this?
 app.get('/', (req,res) => {
-  res.send("Hello World!")
+  res.send("Dobar dan!")
   console.log("Hello World u konzolu")
 })
 
