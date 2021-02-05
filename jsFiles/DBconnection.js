@@ -622,6 +622,13 @@ module.exports = {
 
     getAllUsers:function(request,response){
       var sql = "SELECT * FROM User;"
+
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
     }
 
 
