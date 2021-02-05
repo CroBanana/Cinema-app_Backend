@@ -20,16 +20,16 @@ app.use(function(req, res, next) {
 var mysql = require('mysql'); 
 const { request, response } = require('express');
 const backend = process.env.PORT || 3000; 
-
+/*
 var pool = mysql.createPool({
-    connectionLimit:1,
+    connectionLimit:3,
     host: "remotemysql.com",
     user: "KnV19OC0YF",
     password: "TaiKwEQOCL",
     port: "3306",
     database: "KnV19OC0YF"
 
-})
+})*/
 
 //░░░░░░░░███░░░░░░░░
 //░░░░░░░░███░░░░░░░░
@@ -225,25 +225,8 @@ app.get('/mojIzbor/izborDohvat/:id_korisnik', (request, response,next) =>{
 
 
 app.post('/Cijene/unosCijene', (request, response, next) =>{
-  let post_data = request.body; 
+  DBconnection.unosCijene(request,response)
   
-  var datum_unosa = moment(Date.now()).format('YYYY-MM-DD HH:mm:ss');
-  let naziv = post_data.naziv; 
-  let cijene_djeca = post_data.cijene_djeca;
-  let cijene_odrasli = post_data.cijene_odrasli; 
-  let cijene_studenti = post_data.cijene_studenti;  
-
-  var sql = "INSERT INTO Cijene (datum_unosa, naziv, cijene_djeca, cijene_odrasli, cijene_studenti) VALUES (?,?,?, ?, ?)"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [datum_unosa, naziv, cijene_djeca, cijene_odrasli, cijene_studenti], (err, res)=>{
-      connection.release()
-      if(err) throw err; 
-      
-      console.log("uneseno");
-    
-    })
-  })
 })
 
 app.post('/Karta/unosPonude', (request, response, next) =>{
@@ -255,393 +238,118 @@ app.post('/Karta/unosPonude', (request, response, next) =>{
 
 app.post("/Raspored_filmova/dodaj", (request, response, next)=>{
 
-  let post_data = request.body; 
-  var datum_unosa = moment(Date.now()).format('YYYY-MM-DD'); 
-  var datum_prikazivanja = post_data.datum_prikazivanja; 
-  var vrijeme_prikazivanja = post_data.vrijeme_prikazivanja;  
-  var id_filma = post_data.id_filma; 
-  var max_ulaznica = post_data.max_ulaznica; 
-  var trenutno_ulaznica = post_data.trenutno_ulaznica; 
-  var dvorana = post_data.dvorana; 
-
-  var sql = "INSERT INTO Raspored_filmova (id_filma, datum_unosa, datum_prikazivanja, vrijeme_prikazivanja, max_ulaznica, trenutno_ulaznica, dvorana) VALUES (?,?,?,?,?,?,?)"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [id_filma, datum_unosa, datum_prikazivanja, vrijeme_prikazivanja,max_ulaznica, trenutno_ulaznica, dvorana], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-      console.log("Uneseno");
-      response.send("uneseno");
-    })
-  })
+  DBconnection.rasporedFilmova_dodaj(request,response)
+  
 })
 
 app.get('/Raspored_filmova/dohvatFilma/:id_filma', (request, response,next) =>{
 
-  let id_filma = request.params.id_filma;
-  var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
-
-  var sql = "SELECT Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja  FROM Raspored_filmova, Film WHERE Raspored_filmova.id_filma = ? AND Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [id_filma,datum_unosa], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      console.log("Prikazani su svi izbori!"); 
-      response.json(res);
-    })
-  })
+  DBconnection.dohvatFulmova_id(request,response)
+  
 })
 
 app.get('/Cijene/dohvatCijena', (request, response, next)=>{
 
-    var sql = "SELECT * FROM Cijene WHERE datum_unosa = (SELECT MAX(datum_unosa) FROM Cijene)"; 
-    pool.getConnection(function(error,connection){
-      if(error) throw error
-      connection.query(sql, (err, res)=>{
-        connection.release()
-        if(err) throw err; 
-
-        response.json(res);
-      })
-    })
+    DBconnection.dohvatiCijene(request,response)
+    
 
 })
 
 app.get('/Raspored_filmova/dohvatDatum/:datum_prikazivanja', (request, response, next)=>{
 
 
-  let datum_prikazivanja = request.params.datum_prikazivanja; 
-  var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
-
-  var sql = "SELECT Film.naziv, Raspored_filmova.vrijeme_prikazivanja FROM Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [datum_prikazivanja, datum_unosa], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-      
-
-      if(res.length > 0){
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.dohvatiDatum(request,response)
+  
 })
 
 app.get('/Film/dohvatId/:naziv', (request, response, next)=>{
 
 
-  let naziv = request.params.naziv; 
-
-  var sql = "SELECT id FROM Film WHERE naziv = ?"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [naziv], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      if(res.length > 0){
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.dohvatiNaziv(request,response)
+  
 })
 
 app.get('/Raspored_filmova/dohvatNaziv/:datum_prikazivanja/:id_filma', (request, response, next)=>{
 
 
-  let datum_prikazivanja = request.params.datum_prikazivanja; 
-  let id_filma = request.params.id_filma;
-
-  var sql = "SELECT Raspored_filmova.vrijeme_prikazivanja FROM Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.id_filma = ? AND Raspored_filmova.id_filma = Film.id "; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [datum_prikazivanja, id_filma], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      if(res.length > 0){
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.dohvatNaziva2(request,response)
+  
 })
 
 app.get('/Raspored_filmova/dohvatiSve/:datum_prikazivanja/:id_filma/:vrijeme_prikazivanja', (request, response, next)=>{
 
 
-  let datum_prikazivanja = request.params.datum_prikazivanja; 
-  console.log(datum_prikazivanja); 
-  let id_filma = request.params.id_filma;
-  console.log(id_filma);
-  let vrijeme_prikazivanja = request.params.vrijeme_prikazivanja; 
-  console.log(vrijeme_prikazivanja);
-
-  var sql = "SELECT Raspored_filmova.id, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Raspored_filmova.max_ulaznica, Raspored_filmova.trenutno_ulaznica, Raspored_filmova.dvorana FROM Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.vrijeme_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id";
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [datum_prikazivanja, vrijeme_prikazivanja, id_filma], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      if(res.length > 0){
-        console.log(res); 
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.dohvatiSve(request,response)
+  
 })
 
 app.post('/Karta/insert', (request, response, next) => {
 
-  let post_data = request.body; 
-
-  let ime = post_data.ime; 
-  let prezime = post_data.prezime; 
-  let cijena = post_data.cijena; 
-  let red = post_data.red; 
-  let sjedalo = post_data.sjedalo; 
-  let oznaka = post_data.oznaka; 
-  let ukupno = post_data.ukupno; 
-  let id_korisnik = post_data.id_korisnik; 
-  let id_raspored = post_data.id_raspored; 
-
-  var sql = "INSERT INTO Karta (ime, prezime, cijena, red, sjedalo, oznaka, ukupno, id_raspored, id_korisnik) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [ime, prezime, cijena, red, sjedalo, oznaka, ukupno, id_raspored, id_korisnik,], (err, res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      response.json("true"); 
-    })
-  })
+  DBconnection.insertKarta(request,response)
+  
 })
 
 app.post('/Raspored_filmova/update', (request, response, next)=>{
 
-  let post_data = request.body; 
-
-  let trenutno_ulaznica = post_data.trenutno_ulaznica;
-  let id = post_data.id;  
+  DBconnection.rasporedFilmova_Update(request,response)
   
-  var sql = 'UPDATE Raspored_filmova SET trenutno_ulaznica = ? WHERE id = ? ';
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql,[trenutno_ulaznica, id], (err,res)=>{
-      connection.release()
-        if(err) throw err; 
-        
-        response.json(true); 
-    })
-  })
   
 })
 
 app.get('/Karta/dohvatiSve/:datum_prikazivanja/:id_filma/:vrijeme_prikazivanja/:id', (request, response, next)=>{
 
-  let id = request.params.id; 
-  let datum_prikazivanja = request.params.datum_prikazivanja; 
-  let id_filma = request.params.id_filma;
-  let vrijeme_prikazivanja = request.params.vrijeme_prikazivanja; 
-
-  var sql = "SELECT Karta.oznaka FROM Karta, Raspored_filmova, Film WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.vrijeme_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id AND Raspored_filmova.id = Karta.id_raspored";
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [datum_prikazivanja, vrijeme_prikazivanja, id_filma, id], (err,res)=>{
-      connection.release
-      if(err) throw err; 
-
-      if(res.length > 0){
-        console.log(res); 
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.kartaDohvatiSve(request,response)
+  
 })
 
 app.get('/Karta/ponudaDatum/:datum_prikazivanja/:id_korisnik', (request, response, next)=>{
 
-  let datum_prikazivanja = request.params.datum_prikazivanja;  
-  let id_korisnik = request.params.id_korisnik; 
-
-  var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
-
-  var sql = "SELECT Film.slika, Film.naziv, Film.id, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja FROM Karta, Raspored_filmova, Film WHERE Karta.id_korisnik = ? AND Raspored_filmova.datum_prikazivanja = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?";
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [id_korisnik, datum_prikazivanja, datum_unosa], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      if(res.length > 0){
-        console.log(res); 
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.kartaPonudaDatuma(request,response)
+  
 })
 
 app.get('/Karta/sveRezervacije/:id_korisnik', (request, response, next)=>{
 
-  let id_korisnik = request.params.id_korisnik; 
-
-  var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
-
-  var sql = "SELECT Film.slika, Film.naziv, Karta.id, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja FROM Karta, Raspored_filmova, Film WHERE Karta.id_korisnik = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?";
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [id_korisnik, datum_unosa], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      if(res.length > 0){
-        console.log(res); 
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.kartaSveRezervacije(request,response)
+  
 })
 
 app.get('/Karta/dohvatiRezervaciju/:id', (request, response, next)=>{
 
-  let id = request.params.id; 
-
-  var sql = "SELECT Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje, Film.ocjena FROM Karta, Raspored_filmova, Film WHERE Karta.id = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id ";
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [id], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      if(res.length > 0){
-        console.log(res); 
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.kartaDohvatiRezervacije(request,response)
+  
 })
 
 app.delete('/Karta/deleteRezervacija/:id', (request, response, next)=>{
 
-  let id = request.params.id; 
+  DBconnection.kartaDeleteRezervacija(request,response)
 
-  var sql = "DELETE FROM Karta WHERE id = ?"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-
-    connection.query(sql, [id], (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      response.json("true"); 
-    })
-  })
 })
 
 
 app.post('/Najcesca_pitanja/insert', (request, response, next) => {
 
-  let post_data = request.body; 
-
-  let naziv = post_data.naziv; 
-  let opis = post_data.opis;  
-
-  var sql = "INSERT INTO Najcesca_pitanja (naziv, opis) VALUES (?, ?)"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [naziv,opis], (err, res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      response.json("true"); 
-    })
-  })
+  DBconnection.najcescaPitanjaInsert(request,response)
+  
 })
 
 app.get('/Najcesca_pitanja/dohvatPitanja/', (request, response, next)=>{
 
-  var sql = "SELECT * FROM Najcesca_pitanja"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, (err,res)=>{
-      connection.release()
-      if(err) throw err; 
-
-      if(res.length > 0){
-        response.json(res); 
-      }else{
-        console.log("null");
-        response.json(null);
-      }
-    })
-  })
+  DBconnection.najcescaPitanjaDohvat(request,response)
+  
 })
 
 app.post('/Upit/insert', (request, response, next)=> {
   
-  let post_data = request.body; 
-
-  let pitanje = post_data.pitanje; 
-  let prijedlog = post_data.prijedlog; 
-  let id_korisnik = post_data.id_korisnik; 
-
-  var sql = 'INSERT INTO Upit(pitanje, prijedlog, id_korisnik) VALUES ( ?, ?, ?)';
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-      connection.query(sql,[pitanje, prijedlog, id_korisnik], (err,res) =>{
-        connection.release()
-          if(err){
-             throw err;
-           }
-           response.send(true);
-     })
-    })
+  DBconnection.upitInsert(request,response)
+    
   }
 );
 
 
 app.get('/Film/dohvat_preporuka', (request, response, next) =>{
-  let post_data = request.body; 
+  DBconnection.filmDOhvatPreporuka(request,response)
   
-  var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
-  
-  var sql = "SELECT DISTINCT Film.naziv, Film.slika, Film.zanr, Film.trajanje, Film.ocjena, Film.id, Film.slika_pozadina FROM Film, Raspored_filmova WHERE Raspored_filmova.datum_prikazivanja = ? AND Raspored_filmova.id_filma = Film.id"; 
-  pool.getConnection(function(error,connection){
-    if(error) throw error
-    connection.query(sql, [datum_unosa], (err, res)=>{
-      connection.release()
-      if(err) throw err; 
-      
-      response.json(res);
-    })
-  })
 })
  
 
