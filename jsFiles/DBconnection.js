@@ -618,6 +618,10 @@ module.exports = {
         
         response.json(res);
       })
+    },
+
+    getAllUsers:function(request,response){
+      var sql = "SELECT * FROM User;"
     }
 
 

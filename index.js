@@ -366,3 +366,7 @@ app.post("/db/login", (req,res) =>{
 app.get("/Rezervacije/Admin", (request, response, next) =>{
   DBconnection.kartaSveRezervacijeAdmin(request,response)
 })
+
+app.get("/Users",(request,response, next)=>{
+  DBconnection.getAllUsers(request,response)
+})
