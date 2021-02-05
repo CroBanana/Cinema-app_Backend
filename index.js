@@ -359,6 +359,10 @@ var login = require("./jsFiles/login")
 //var register = require("./register")
 
 
-  app.post("/db/login", (req,res) =>{
-    console.log(req.body)
-    login.login(req,res)})
+app.post("/db/login", (req,res) =>{
+  console.log(req.body)
+  login.login(req,res)})
+
+app.get("/Rezervacije/Admin", (request, response, next) =>{
+  DBconnection.kartaSveRezervacijeAdmin(request,response)
+})

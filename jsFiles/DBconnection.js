@@ -13,7 +13,7 @@ var con = mysql.createConnection({
 var moment = require('moment');
 
 var pool = mysql.createPool({
-  connectionLimit:5,
+  connectionLimit:1,
   host: "remotemysql.com",
   user: "KnV19OC0YF",
   password: "TaiKwEQOCL",
@@ -321,16 +321,10 @@ module.exports = {
   },
 
   dohvatiCijene:function(request,response){
-    let id_filma = request.params.id_filma;
-    var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
-
-    var sql = "SELECT Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja  FROM Raspored_filmova, Film WHERE Raspored_filmova.id_filma = ? AND Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?"; 
-
-    pool.query(sql, [id_filma,datum_unosa], (err,res)=>{
-      
+    var sql = "SELECT * FROM Cijene WHERE datum_unosa = (SELECT MAX(datum_unosa) FROM Cijene)"; 
+    pool.query(sql, (err, res)=>{
       if(err) throw err; 
 
-      console.log("Prikazani su svi izbori!"); 
       response.json(res);
     })
   },
@@ -499,14 +493,14 @@ module.exports = {
   },
 
   kartaSveRezervacije:function (request,response) {
-    let id_korisnik = request.params.id_korisnik; 
-
+    
+    console.log(request.params)
   var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
 
   var sql = "SELECT Film.slika, Film.naziv, Karta.id, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja FROM Karta, Raspored_filmova, Film WHERE Karta.id_korisnik = ? AND Karta.id_raspored = Raspored_filmova.id AND  Raspored_filmova.id_filma = Film.id AND Raspored_filmova.datum_prikazivanja >= ?";
 
-    pool.query(sql, [id_korisnik, datum_unosa], (err,res)=>{
-      
+    pool.query(sql, [request.params.id_korisnik , datum_unosa], (err,res)=>{
+      console.log(res)
       if(err) throw err; 
 
       if(res.length > 0){
@@ -514,7 +508,7 @@ module.exports = {
         response.json(res); 
       }else{
         console.log("null");
-        response.json(null);
+        response.json("Nema rezervacija");
       }
     })
   },
@@ -613,7 +607,18 @@ module.exports = {
       
       response.json(res);
     })
-  }
+  }, 
+
+  kartaSveRezervacijeAdmin:function(request,response){
+
+    var sql = "SELECT Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje FROM KnV19OC0YF.Karta, KnV19OC0YF.Raspored_filmova, KnV19OC0YF.Film  order by Raspored_filmova.datum_prikazivanja DESC , Raspored_filmova.vrijeme_prikazivanja DESC"; 
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+    }
 
 
 
