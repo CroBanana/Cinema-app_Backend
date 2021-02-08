@@ -143,21 +143,7 @@ app.post('/film/dodaj_zanr', (request, response, next)=> {
 
 app.post('/unos_filma', (request, response, next)=> {
   
-  console.log(request.body)
-  response.json("ok       string za ubacivanje INSERT INTO Film(naziv,strani_naziv,redatelji,glumci,drzava,audio,titlovi,trajanje,opis,slika,slika_pozadina, zanr, ocjena) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)")
-
-
-/*
-  var sql = 'INSERT INTO Film(naziv,strani_naziv,redatelji,glumci,drzava,audio,titlovi,trajanje,opis,slika,slika_pozadina, zanr, ocjena) VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)';
-
-      con.query(sql,[naziv,strani_naziv,redatelji,glumci,drzava,audio,titlovi,trajanje,opis,slika,slika_pozadina, zanr, ocjena], (err,res) =>{
-          if(err){
-             throw err;
-           }
-           response.send(true);
-     })
-  }
-  */
+  DBconnection.unosFilma(request,response)
 })
 
 var changeUser = require("./jsFiles/changeUser")
@@ -369,4 +355,37 @@ app.get("/Rezervacije/Admin", (request, response, next) =>{
 
 app.get("/Users",(request,response, next)=>{
   DBconnection.getAllUsers(request,response)
+})
+
+app.get("/Dates",(request,response, next)=>{
+  DBconnection.getDates(request,response)
+})
+
+app.get("/VrijemeGledanja",(request,response,next) =>{
+  DBconnection.getTime(request,response)
+})
+
+app.post("/FiltriraneRezervacije", (request,response)=>{
+  
+  DBconnection.getRezervacijeWhen(request,response)
+})
+
+app.get("/FilmoviNaziv", (request,response)=>{
+  DBconnection.getFilmoviNaziv(request,response)
+})
+
+app.get("/Drzave", (request,response)=>{
+  DBconnection.getDrzave(request,response)
+})
+
+app.get("/Godine", (request,response)=>{
+  DBconnection.getGodine(request,response)
+})
+
+app.get("/Audio", (request,response)=>{
+  DBconnection.getAudio(request,response)
+})
+
+app.post("/FiltriraniFIlmovi", (request,response)=>{
+  DBconnection.filtriraniFilmovi(request,response)
 })

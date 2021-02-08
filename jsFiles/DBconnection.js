@@ -285,19 +285,23 @@ module.exports = {
     })
   },
 
+
+
+
   rasporedFilmova_dodaj:function (request,response){
     let post_data = request.body; 
   var datum_unosa = moment(Date.now()).format('YYYY-MM-DD'); 
-  var datum_prikazivanja = post_data.datum_prikazivanja; 
-  var vrijeme_prikazivanja = post_data.vrijeme_prikazivanja;  
-  var id_filma = post_data.id_filma; 
-  var max_ulaznica = post_data.max_ulaznica; 
-  var trenutno_ulaznica = post_data.trenutno_ulaznica; 
-  var dvorana = post_data.dvorana; 
+  
 
   var sql = "INSERT INTO Raspored_filmova (id_filma, datum_unosa, datum_prikazivanja, vrijeme_prikazivanja, max_ulaznica, trenutno_ulaznica, dvorana) VALUES (?,?,?,?,?,?,?)"; 
 
-    pool.query(sql, [id_filma, datum_unosa, datum_prikazivanja, vrijeme_prikazivanja,max_ulaznica, trenutno_ulaznica, dvorana], (err,res)=>{
+    pool.query(sql, [post_data.id_filma, 
+      datum_unosa, 
+      post_data.datum_prikazivanja, 
+      post_data.vrijeme_prikazivanja,
+      post_data.max_ulaznica, 
+      post_data.trenutno_ulaznica, 
+      post_data.dvorana], (err,res)=>{
 
       if(err) throw err; 
       console.log("Uneseno");
@@ -611,7 +615,7 @@ module.exports = {
 
   kartaSveRezervacijeAdmin:function(request,response){
 
-    var sql = "SELECT Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje FROM KnV19OC0YF.Karta, KnV19OC0YF.Raspored_filmova, KnV19OC0YF.Film  order by Raspored_filmova.datum_prikazivanja DESC , Raspored_filmova.vrijeme_prikazivanja DESC"; 
+    var sql = "SELECT Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje FROM Karta, Raspored_filmova, Film  order by Raspored_filmova.datum_prikazivanja DESC , Raspored_filmova.vrijeme_prikazivanja DESC"; 
       pool.query(sql, (err, res)=>{
   
         if(err) throw err; 
@@ -629,9 +633,237 @@ module.exports = {
         
         response.json(res);
       })
+    },
+
+    getDates:function(request,response){
+      var datum_prikazivanja = moment(Date.now()).format('YYYY-MM-DD');
+      var sql = `SELECT DISTINCT  datum_prikazivanja FROM Raspored_filmova where datum_prikazivanja >= ${datum_prikazivanja};`
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+    },
+
+    getTime:function(request,response){
+      var sql="SELECT DISTINCT  vrijeme_prikazivanja FROM KnV19OC0YF.Raspored_filmova;"
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+    },
+
+    getRezervacijeWhen:async function(request,response){
+      
+      var sql =`SELECT Film.id, Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje 
+      FROM Karta, Raspored_filmova, Film `
+      
+      
+      if(request.body.id_film !=""){
+        let id = await this.findID(`select id from Film where naziv="${request.body.id_film}"`)
+        
+        console.log("Sould be after res")
+        sql= sql+` where Film.id = ${id} `
+      }
+      
+      if(request.body.odabrani_datum !=""){
+        if(request.body.id_film =="" ){
+          sql= sql+` where Raspored_filmova.datum_prikazivanja = "${request.body.odabrani_datum}" `
+        }else{
+          sql= sql+ ` and Raspored_filmova.datum_prikazivanja = "${request.body.odabrani_datum}" `
+        }
+      }
+  
+      if(request.body.odabrano_vrijeme !=""){
+        if(request.body.id_film=="" && request.body.odabrani_datum ==""){
+          sql= sql+ ` where Raspored_filmova.vrijeme_prikazivanja = "${request.body.odabrano_vrijeme}" `
+        }else{
+          sql= sql+ ` and Raspored_filmova.vrijeme_prikazivanja = "${request.body.odabrano_vrijeme}" `
+        }
+      }
+
+      sql= sql+ `order by Raspored_filmova.datum_prikazivanja DESC , 
+      Raspored_filmova.vrijeme_prikazivanja DESC`
+      
+      //response.json(sql)
+      
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+
+
+    },
+    findID:function(sql){
+      return new Promise(resolve => {
+        pool.query(sql, (err,res)=>{
+          if(err) throw err
+          console.log("This is res")
+          console.log(res)
+          console.log(res[0].id)
+          resolve(res[0].id)
+        })
+        
+      })
+    },
+
+    getFilmoviNaziv: function(request,response){
+      let sql = "SELECT distinct naziv FROM Film order by naziv asc"
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+    },
+
+    unosFilma:async function(request,response){
+      
+
+      let movieExists = await this.provjera(`select * from Film where naziv="${request.body.film.Naziv}"`)
+      console.log(movieExists)
+
+      if(movieExists>0){
+        response.send("film vec postoji")
+      }else{
+
+      var sql = `INSERT INTO Film(naziv,
+        strani_naziv,
+        redatelji,
+        glumci,
+        drzava,
+        audio,
+        titlovi,
+        trajanje,
+        opis,
+        slika,
+        slika_pozadina, 
+        zanr, 
+        ocjena,
+        trailer,
+        godina_proizvodnje) VALUES ( 
+          ${request.body.film.Naziv}, 
+          ${request.body.film.Strani_Naziv}, 
+          ${request.body.film.Redatelji}, 
+          ${request.body.film.Glumci}, 
+          ${request.body.film.Drzava}, 
+          ${request.body.film.Audio}, 
+          ${request.body.film.Titlovi}, 
+          ${request.body.film.Trajanje}, 
+          ${request.body.film.Opis}, 
+          ${request.body.film.Slika}, 
+          ${request.body.film.Pozadina}, 
+          ${request.body.film.Zanr}, 
+          ${request.body.film.Ocjena},
+          ${request.body.film.Trailer},
+          ${request.body.film.Godina_proizvodnje})`;
+
+          console.log(sql)
+          
+          
+          pool.query(sql, (err,res) =>{
+              if(err){
+                  throw err;
+                }
+                response.send("Umetnuto");
+          })
+      
+        }
+
+    },
+    provjera:function(sql){
+      return new Promise(resolve => {
+        pool.query(sql, (err,res)=>{
+          if(err) throw err
+          console.log("This is res")
+          console.log(res)
+          console.log(res.length)
+          resolve(res.length)
+        })
+        
+      })
+    },
+
+    getDrzave:function(request,response){
+      let sql = "SELECT distinct drzava FROM Film order by drzava asc"
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+    },
+
+    getAudio:function(request,response){
+      let sql = "SELECT distinct audio FROM Film order by audio asc"
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+    },
+
+    getGodine:function(request,response){
+      let sql = "SELECT distinct godina_proizvodnje FROM Film order by godina_proizvodnje desc"
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
+    },
+
+    filtriraniFilmovi:function(request,response){
+      var sql =`SELECT * from Film `
+      //console.log(request.body)
+      
+      if(request.body.naziv !=""){
+        
+        
+        sql= sql+` where naziv = "${request.body.naziv}" `
+      }
+      
+      if(request.body.drzava !=""){
+        if(request.body.naziv =="" ){
+          sql= sql+` where drzava = "${request.body.drzava}" `
+        }else{
+          sql= sql+ ` and drzava = "${request.body.drzava}" `
+        }
+      }
+  
+      if(request.body.godina_proizvodnje !=""){
+        if(request.body.naziv=="" && request.body.drzava ==""){
+          sql= sql+ ` where godina_proizvodnje = "${request.body.godina_proizvodnje}" `
+        }else{
+          sql= sql+ ` and godina_proizvodnje = "${request.body.godina_proizvodnje}" `
+        }
+      }
+
+      if(request.body.audio !=""){
+        if(request.body.naziv=="" && request.body.drzava =="" && request.body.godina_proizvodnje ==""){
+          sql = sql + `where audio ="${request.body.audio}"`
+        }else{
+          sql= sql+ `and audio = "${request.body.audio}"`
+        }
+      }
+
+      sql= sql+ `order by godina_proizvodnje asc, naziv desc`
+      
+      console.log(sql)
+      
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
     }
-
-
 
 }
   
