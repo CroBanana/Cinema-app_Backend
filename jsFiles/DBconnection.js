@@ -725,7 +725,7 @@ module.exports = {
     unosFilma:async function(request,response){
       
 
-      let movieExists = await this.provjera(`select * from Film where naziv="${request.body.film.Naziv}"`)
+      let movieExists = await this.provjera(`select * from Film where naziv="${request.body.Naziv}"`)
       console.log(movieExists)
 
       if(movieExists>0){
@@ -747,21 +747,21 @@ module.exports = {
         ocjena,
         trailer,
         godina_proizvodnje) VALUES ( 
-          ${request.body.film.Naziv}, 
-          ${request.body.film.Strani_Naziv}, 
-          ${request.body.film.Redatelji}, 
-          ${request.body.film.Glumci}, 
-          ${request.body.film.Drzava}, 
-          ${request.body.film.Audio}, 
-          ${request.body.film.Titlovi}, 
-          ${request.body.film.Trajanje}, 
-          ${request.body.film.Opis}, 
-          ${request.body.film.Slika}, 
-          ${request.body.film.Pozadina}, 
-          ${request.body.film.Zanr}, 
-          ${request.body.film.Ocjena},
-          ${request.body.film.Trailer},
-          ${request.body.film.Godina_proizvodnje})`;
+          "${request.body.Naziv}", 
+          "${request.body.Strani_Naziv}", 
+          "${request.body.Redatelji}", 
+          "${request.body.Glumci}", 
+          "${request.body.Drzava}", 
+          "${request.body.Audio}", 
+          "${request.body.Titlovi}", 
+          "${request.body.Trajanje}", 
+          "${request.body.Opis}", 
+          "${request.body.Slika}", 
+          "${request.body.Pozadina}", 
+          "${request.body.Zanr}", 
+          "${request.body.Ocjena}",
+          "${request.body.Trailer}",
+          "${request.body.Godina_proizvodnje}")`;
 
           console.log(sql)
           

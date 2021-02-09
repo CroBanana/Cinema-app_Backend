@@ -2,8 +2,15 @@
 var express = require('express');
 var mysql = require('mysql');
 var moment = require('moment');
+var cors = require("cors");
+
+const corsOption ={
+  origin:"*",
+  methods:"GET,PUT,POST,DELETE"
+}
 
 var app = express();
+app.use(cors(corsOption))
 var bodyParser = require('body-parser');
 app.use(bodyParser.json());
 //app.use(bodyParser.urlencoded({ extended: true }));
@@ -11,12 +18,14 @@ app.use(bodyParser.json());
 app.use(express.json({limit: '50mb', extended: true}));
 app.use(express.urlencoded({limit: "50mb", extended: true, parameterLimit:50000}));
 
-app.use(function(req, res, next) {
-  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
-  res.header("Access-Control-Allow-Headers", "*");
-  next();
-});
 
+/*
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "http://localhost:8080"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", "*");
+  next()
+});
+*/
 var mysql = require('mysql'); 
 const { request, response } = require('express');
 const backend = process.env.PORT || 3000; 
