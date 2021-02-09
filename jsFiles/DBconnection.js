@@ -13,7 +13,7 @@ var con = mysql.createConnection({
 var moment = require('moment');
 
 var pool = mysql.createPool({
-  connectionLimit:1,
+  connectionLimit:2,
   host: "remotemysql.com",
   user: "KnV19OC0YF",
   password: "TaiKwEQOCL",
@@ -863,7 +863,45 @@ module.exports = {
         
         response.json(res);
       })
+    },
+
+    noviFilmRaspored: async function(request,response){
+      
+      console.log(`select id from Film where naziv="${request.body.film}"`)
+
+      let id_filma = await this.findID(`select id from Film where naziv="${request.body.film}"`)
+      var datum_unosa = moment(Date.now()).format('YYYY-MM-DD');
+
+      var sql = `insert into Raspored_filmova (id_filma, datum_unosa, datum_prikazivanja,vrijeme_prikazivanja,max_ulaznica,trenutno_ulaznica,dvorana) values (
+        ${id_filma}, 
+        "${datum_unosa}", 
+        "${request.body.datum_prikazivanja}", 
+        "${request.body.vrijeme_prikazivanja}", 
+        "${request.body.max_ulaznica}", 
+        "${request.body.max_ulaznica}", 
+        "Dvorana 1")`
+        console.log(sql)
+      
+        pool.query(sql, (err, res)=>{
+  
+          if(err) throw err; 
+          
+          response.json("Insert Was a succes");
+        })
+      
+    },
+
+    sviRasporedi: function(request,response){
+      var sql = "SELECT Raspored_filmova.id, Raspored_filmova.id_filma, Film.naziv, Raspored_filmova.datum_unosa,Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Raspored_filmova.max_ulaznica, Raspored_filmova.trenutno_ulaznica,Raspored_filmova.dvorana FROM Raspored_filmova, Film where Raspored_filmova.id_filma=Film.id;";
+      pool.query(sql, (err, res)=>{
+  
+        if(err) throw err; 
+        
+        response.json(res);
+      })
     }
+
+  
 
 }
   

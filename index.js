@@ -389,3 +389,11 @@ app.get("/Audio", (request,response)=>{
 app.post("/FiltriraniFIlmovi", (request,response)=>{
   DBconnection.filtriraniFilmovi(request,response)
 })
+
+app.post("/NoviFilmRaspored", (request,response) =>{
+  DBconnection.noviFilmRaspored(request,response)
+})
+
+app.get("/SviRasporedi", (request,response) =>{
+  DBconnection.sviRasporedi(request,response)
+})
