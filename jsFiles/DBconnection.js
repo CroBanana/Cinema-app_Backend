@@ -615,7 +615,7 @@ module.exports = {
 
   kartaSveRezervacijeAdmin:function(request,response){
 
-    var sql = "SELECT Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje FROM Karta, Raspored_filmova, Film  order by Raspored_filmova.datum_prikazivanja DESC , Raspored_filmova.vrijeme_prikazivanja DESC"; 
+    var sql = "SELECT Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje FROM Karta, Raspored_filmova, Film where Film.id=Raspored_filmova.id_filma and Raspored_filmova.id=Karta.id_raspored  order by Raspored_filmova.datum_prikazivanja DESC , Raspored_filmova.vrijeme_prikazivanja DESC;    "; 
       pool.query(sql, (err, res)=>{
   
         if(err) throw err; 
@@ -659,36 +659,32 @@ module.exports = {
     getRezervacijeWhen:async function(request,response){
       
       var sql =`SELECT Film.id, Karta.ime, Karta.prezime, Film.naziv, Raspored_filmova.datum_prikazivanja, Raspored_filmova.vrijeme_prikazivanja, Karta.red, Karta.sjedalo, Karta.cijena, Film.zanr, Film.trajanje 
-      FROM Karta, Raspored_filmova, Film `
+      FROM Karta, Raspored_filmova, Film where Film.id=Raspored_filmova.id_filma and Raspored_filmova.id=Karta.id_raspored `
       
       
       if(request.body.id_film !=""){
         let id = await this.findID(`select id from Film where naziv="${request.body.id_film}"`)
         
         console.log("Sould be after res")
-        sql= sql+` where Film.id = ${id} `
+        sql= sql+` and Film.id = ${id} `
       }
       
       if(request.body.odabrani_datum !=""){
-        if(request.body.id_film =="" ){
-          sql= sql+` where Raspored_filmova.datum_prikazivanja = "${request.body.odabrani_datum}" `
-        }else{
+        
           sql= sql+ ` and Raspored_filmova.datum_prikazivanja = "${request.body.odabrani_datum}" `
-        }
+        
       }
   
       if(request.body.odabrano_vrijeme !=""){
-        if(request.body.id_film=="" && request.body.odabrani_datum ==""){
-          sql= sql+ ` where Raspored_filmova.vrijeme_prikazivanja = "${request.body.odabrano_vrijeme}" `
-        }else{
+        
           sql= sql+ ` and Raspored_filmova.vrijeme_prikazivanja = "${request.body.odabrano_vrijeme}" `
-        }
+        
       }
 
-      sql= sql+ `order by Raspored_filmova.datum_prikazivanja DESC , 
+      sql= sql+ ` order by Raspored_filmova.datum_prikazivanja DESC , 
       Raspored_filmova.vrijeme_prikazivanja DESC`
       
-      //response.json(sql)
+      console.log(sql)
       
       pool.query(sql, (err, res)=>{
   
